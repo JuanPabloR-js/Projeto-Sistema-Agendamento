@@ -38,8 +38,8 @@ public class Servico {
 
     @Column(name = "duracao_minutos", nullable = false)
     private Integer duracaoMinutos;
-    
-    @Column(nullable = false, precision = 10, scale = 2)
+
+    @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal preco;
     private Boolean ativo;
 
