@@ -41,6 +41,8 @@ public class Servico {
 
     @Column(nullable = false, precision = 4, scale = 2)
     private BigDecimal preco;
+
+    @Column(nullable = false)
     private Boolean ativo;
 
     @PrePersist
