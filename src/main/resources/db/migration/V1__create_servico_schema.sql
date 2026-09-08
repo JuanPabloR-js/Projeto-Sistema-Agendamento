@@ -1,8 +1,8 @@
     CREATE TABLE servico (
-        id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+        id                  BIGSERIAL PRIMARY KEY,
         nome                VARCHAR(100) NOT NULL,
         descricao           VARCHAR(255) NOT NULL,
-        duracao_minutos     INTEGER NOT NULL,
+        duracao_minutos     INT NOT NULL,
         preco               DECIMAL(4, 2) NOT NULL,
         ativo               BOOLEAN NOT NULL DEFAULT TRUE,
 
