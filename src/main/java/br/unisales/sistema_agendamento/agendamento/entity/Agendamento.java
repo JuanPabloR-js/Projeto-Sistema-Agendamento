@@ -1,4 +1,4 @@
-package br.unisales.sistema_agendamento.agendamento.domain;
+package br.unisales.sistema_agendamento.agendamento.entity;
 
 import br.unisales.sistema_agendamento.agendamento.enumeration.StatusAgendamento;
 import jakarta.persistence.*;
