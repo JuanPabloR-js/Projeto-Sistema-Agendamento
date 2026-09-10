@@ -1,9 +1,14 @@
 package br.unisales.sistema_agendamento.config;
 
+import br.unisales.sistema_agendamento.security.JwtAuthenticationFilter;
+import br.unisales.sistema_agendamento.security.JwtService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -12,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
  * @apiNote Classe responsável pela configuração de segurança da API.
@@ -55,16 +61,11 @@ public class SecurityConfig {
                                 "/auth/login"
                         ).permitAll()
 
-                        // Consultas públicas de barbeiros
+                        // Consultas públicas
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/barbeiros",
-                                "/barbeiros/**"
-                        ).permitAll()
-
-                        // Consultas públicas de serviços
-                        .requestMatchers(
-                                HttpMethod.GET,
+                                "/barbeiros/**",
                                 "/servicos",
                                 "/servicos/**"
                         ).permitAll()
@@ -101,43 +102,37 @@ public class SecurityConfig {
                                 "/servicos/**"
                         ).hasRole("ADMIN")
 
-                        // Cliente cria um agendamento
+                        // Agendamentos
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/agendamentos"
                         ).hasRole("CLIENTE")
 
-                        // Cliente e barbeiro visualizam seus agendamentos
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/agendamentos/meus"
                         ).hasAnyRole("CLIENTE", "BARBEIRO")
 
-                        // Somente o administrador lista todos
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/agendamentos"
                         ).hasRole("ADMIN")
 
-                        // Cliente ou administrador podem cancelar
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/agendamentos/*/cancelar"
                         ).hasAnyRole("CLIENTE", "ADMIN")
 
-                        // Barbeiro confirma o agendamento
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/agendamentos/*/confirmar"
                         ).hasRole("BARBEIRO")
-
-                        // Barbeiro ou administrador concluem
                         .requestMatchers(
                                 HttpMethod.PATCH,
                                 "/agendamentos/*/concluir"
                         ).hasAnyRole("BARBEIRO", "ADMIN")
 
-                        // Qualquer outra rota exige login
+                        // Qualquer outra rota exige autenticação
                         .anyRequest().authenticated()
                 );
 
@@ -148,13 +143,5 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    //Esse objeto será utilizado posteriormente no AuthService para verificar email e senha:
-    @Bean
-    public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration configuration
-    ) throws Exception {
-        return configuration.getAuthenticationManager();
     }
 }
