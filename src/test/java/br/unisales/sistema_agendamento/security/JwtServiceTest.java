@@ -1,6 +1,8 @@
 package br.unisales.sistema_agendamento.security;
 
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.User;
@@ -81,5 +83,38 @@ class JwtServiceTest {
                 jwtService.tokenValido(token, outroUsuario);
 
         assertFalse(resultado);
+    }
+
+    @Test
+    void deveRejeitarTokenExpirado() {
+        String segredo =
+                "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=";
+
+        // Expiração no passado, sem precisar pausar o teste.
+        JwtService emissor = new JwtService(segredo, -60_000);
+
+        String token = emissor.gerarToken(usuario);
+
+        assertThrows(
+                ExpiredJwtException.class,
+                () -> jwtService.extrairEmail(token)
+        );
+    }
+
+    @Test
+    void deveRejeitarTokenAssinadoComOutraChave() {
+        String outroSegredo = java.util.Base64.getEncoder().encodeToString(
+                "abcdef0123456789abcdef0123456789"
+                        .getBytes(java.nio.charset.StandardCharsets.UTF_8)
+        );
+
+        JwtService outroEmissor = new JwtService(outroSegredo, 3_600_000);
+
+        String token = outroEmissor.gerarToken(usuario);
+
+        assertThrows(
+                JwtException.class,
+                () -> jwtService.extrairEmail(token)
+        );
     }
 }
