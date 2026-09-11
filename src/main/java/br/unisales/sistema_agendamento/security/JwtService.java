@@ -12,72 +12,81 @@ import javax.crypto.SecretKey;
 import java.util.Date;
 
 /**
- * @apiNote Classe responsável pela geração e validação dos tokens JWT.
+ * @apiNote Serviço responsável pela criação e validação dos tokens JWT.
  * @author Juan Pablo Rocha Hempel
- * @since 02.09.2026
+ * @since 11.09.2026
  */
 @Service
 public class JwtService {
 
-    private final String chaveSecreta;
+    // Chave utilizada para assinar e validar os tokens.
+    private final SecretKey chave;
+
+    // Tempo de duração do token, em milissegundos.
     private final long tempoExpiracao;
 
-    public JwtService( //construtor
-            @Value("${jwt.secret}") String chaveSecreta, // linha que busca o secret colocado no application.properties
-            @Value("${jwt.expiration}") long tempoExpiracao // linha que busca o tempo de expiração do token
+    public JwtService(
+            @Value("${jwt.secret}") String segredo,
+            @Value("${jwt.expiration}") long tempoExpiracao
     ) {
-        this.chaveSecreta = chaveSecreta;
+        /*
+         * A chave está configurada em Base64 no application.properties.
+         * Primeiro decodificamos o texto e depois criamos a chave segura.
+         */
+        byte[] chaveDecodificada = Decoders.BASE64.decode(segredo);
+        this.chave = Keys.hmacShaKeyFor(chaveDecodificada);
         this.tempoExpiracao = tempoExpiracao;
     }
 
-    public String gerarToken(UserDetails usuario) { // metodo para gerar o token, pegando o usuário autenticado
-        Date dataCriacao = new Date();
-
-        Date dataExpiracao = new Date(
-                dataCriacao.getTime() + tempoExpiracao
-        );
+    /*
+     * Gera um token após o usuário informar e-mail e senha corretos.
+     */
+    public String gerarToken(UserDetails usuario) {
+        Date agora = new Date();
+        Date expiracao = new Date(agora.getTime() + tempoExpiracao);
 
         return Jwts.builder()
-                .subject(usuario.getUsername()) // guarda o email dentro do token
-                .issuedAt(dataCriacao) // registra quando o token foi gerado
-                .expiration(dataExpiracao) // registra quando o token deixa de funcionar
-                .signWith(obterChaveAssinatura()) // assina o token, impede que alguém o modifique
-                .compact(); // transforma tudo em uma String
+                .subject(usuario.getUsername()) // O subject identifica o dono do token.
+                .issuedAt(agora)// momento em q foi criado
+                .expiration(expiracao)// prazo de validade do token
+                .signWith(chave)// assina o token
+                .compact(); //transforma em String
     }
 
-    public String extrairEmail(String token) { // metodo onde abre o token e recupera o email salvo no subject
+    public String extrairEmail(String token) { // metodo para extrair email do armazenamento
         return extrairClaims(token).getSubject();
     }
 
-    public boolean tokenValido( // verificação de token
-            String token,
-            UserDetails usuario
-    ) {
-        String emailDoToken = extrairEmail(token);
+    /*
+     * O token será válido quando:
+     * 1. Pertencer ao usuário carregado;
+     * 2. Ainda não estiver expirado;
+     * 3. Possuir uma assinatura válida.
+     * A assinatura é verificada quando extrairClaims é executado.
+     */
+    public boolean tokenValido(String token, UserDetails usuario) {
+        String email = extrairEmail(token);
 
-        return emailDoToken.equals(usuario.getUsername()) // verifica se o token pertence ao usuário encontrado
-                && usuario.isEnabled() // verifica se usuário está ativo
-                && !tokenExpirado(token); // verifica se o token ainda está no prazo
+        return email.equals(usuario.getUsername())
+                && !tokenExpirado(token);
     }
 
-    private boolean tokenExpirado(String token) { // metodo para verificar se o token ainda esta no prazo
-        Date dataExpiracao = extrairClaims(token).getExpiration();
-
-        return dataExpiracao.before(new Date());
+    private boolean tokenExpirado(String token) { // metodo para validar se o token expirou
+        return extrairClaims(token)
+                .getExpiration()
+                .before(new Date());
     }
 
-    private Claims extrairClaims(String token) { // os Claims são os dados e informações armazenadas dentro do token
+    /*
+     * Lê as informações internas do token.
+     * verifyWith também confirma que o token foi assinado
+     * utilizando a chave correta.
+     */
+    private Claims extrairClaims(String token) {
         return Jwts.parser()
-                .verifyWith(obterChaveAssinatura())
+                .verifyWith(chave)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-    }
-
-    private SecretKey obterChaveAssinatura() {
-        byte[] chaveDecodificada =
-                Decoders.BASE64.decode(chaveSecreta);
-
-        return Keys.hmacShaKeyFor(chaveDecodificada);
     }
 }
