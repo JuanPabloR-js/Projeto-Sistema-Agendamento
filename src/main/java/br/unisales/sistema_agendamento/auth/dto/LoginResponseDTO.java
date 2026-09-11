@@ -13,6 +13,29 @@ public record LoginResponseDTO(
                 description = "Token JWT utilizado nas requisições autenticadas",
                 example = "eyJhbGciOiJIUzI1NiJ9..."
         )
-        String token
+        String token,
+
+        String tipo,
+
+        @Schema(
+                description = "Identificador do usuário",
+                example = "5"
+        )
+        Long usuarioId,
+
+        @Schema(
+                description = "Nome do usuário",
+                example = "Corte de cabelo"
+        )
+        String nome,
+
+        @Schema(
+                description = "E-mail do usuário",
+                example = "teste@email.com"
+        )
+        String email,
+
+        String role
+
 ) {
 }
