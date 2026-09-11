@@ -6,12 +6,16 @@ import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
 import br.unisales.sistema_agendamento.usuario.dto.AtualizarUsuarioRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.UsuarioResponseDTO;
+import br.unisales.sistema_agendamento.usuario.model.Role;
 import br.unisales.sistema_agendamento.usuario.model.Usuario;
 import br.unisales.sistema_agendamento.usuario.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.nio.charset.StandardCharsets;
 
 /**
  * Camada de serviço responsável pelas regras relacionadas ao usuário.
@@ -54,6 +58,57 @@ public class UsuarioService {
 
         usuario.setSenha(senhaCriptografada);
         usuario.setAtivo(true);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Cria a conta que será vinculada a um Cliente ou Barbeiro.
+     * O perfil deve ser escolhido pelo serviço responsável pelo cadastro.
+     */
+    @Transactional
+    public Usuario criar(
+            String nome,
+            String email,
+            String telefone,
+            String senha,
+            Role role
+    ) {
+        if (nome == null || nome.isBlank()) {
+            throw new BusinessException("O nome é obrigatório");
+        }
+
+        if (email == null || email.isBlank()) {
+            throw new BusinessException("O e-mail é obrigatório");
+        }
+
+        if (senha == null || senha.isBlank()) {
+            throw new BusinessException("A senha é obrigatória");
+        }
+
+        if (role == null) {
+            throw new BusinessException("O perfil do usuário é obrigatório");
+        }
+
+        // O limite do BCrypt é em bytes, não em quantidade de caracteres.
+        if (senha.getBytes(StandardCharsets.UTF_8).length > 72) {
+            throw new BusinessException("A senha ultrapassa o limite de 72 bytes");
+        }
+
+        if (usuarioRepository.existsByEmail(email)) {
+            throw new ConflictException("Já existe um usuário com este e-mail");
+        }
+
+        Usuario usuario = new Usuario(
+                nome.strip(),
+                email,
+                telefone,
+                passwordEncoder.encode(senha),
+                role
+        );
+
+        usuario.setAtivo(true);
+
 
         return usuarioRepository.save(usuario);
     }
