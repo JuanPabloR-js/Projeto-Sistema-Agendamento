@@ -69,7 +69,7 @@ public class UsuarioService {
         );
 
         if (!senhaCorreta) {
-            // TODO: futuramente vamos substituir por uma exception padronizada do projeto.
+            // Futuramente vamos substituir por uma exception padronizada do projeto.
             throw new IllegalArgumentException("Senha atual incorreta");
         }
 
@@ -83,9 +83,8 @@ public class UsuarioService {
     }
 
     /**
-     * Busca um Usuario pelo seu ID.
-     *
-     * Este método pode ser reutilizado por outros módulos,
+     * Busca um Usuario pelo seu ID
+     * este metodo pode ser reutilizado por outros modulos
      * como Cliente e Barbeiro, que precisam da entidade Usuario completa.
      */
     public Usuario buscarEntidadePorId(Long usuarioId) {
