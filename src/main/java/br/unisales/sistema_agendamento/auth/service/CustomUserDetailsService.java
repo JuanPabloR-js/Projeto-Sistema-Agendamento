@@ -1,5 +1,6 @@
 package br.unisales.sistema_agendamento.auth.service;
 
+import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
 import br.unisales.sistema_agendamento.usuario.model.Usuario;
 import br.unisales.sistema_agendamento.usuario.service.UsuarioService;
 import org.springframework.security.core.userdetails.User;
@@ -51,7 +52,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                     .disabled(!usuario.isAtivo())
                     .build();
 
-        } catch (RuntimeException exception) {
+        } catch (ResourceNotFoundException exception) {
             /*
              * O Spring Security espera uma UsernameNotFoundException
              * quando o usuário não for encontrado.
