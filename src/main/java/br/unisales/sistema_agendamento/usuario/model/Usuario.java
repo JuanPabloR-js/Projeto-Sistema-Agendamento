@@ -3,8 +3,10 @@ package br.unisales.sistema_agendamento.usuario.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "usuarios")
+@Table(name = "tb_usuarios")
 public class Usuario {
 
     @Id
@@ -21,6 +23,12 @@ public class Usuario {
 
     @Column(nullable = false)
     private String senha;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
+
+    @Column(name = "data_criacao", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -77,12 +85,31 @@ public class Usuario {
         this.senha = senha;
     }
 
+    public boolean isAtivo() {
+        return ativo;
+    }
+
+    public void setAtivo(boolean ativo) {
+        this.ativo = ativo;
+    }
+
     public Role getRole() {
         return role;
     }
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public LocalDateTime getDataCriacao() {
+        return dataCriacao;
+    }
+
+    @PrePersist
+    public void antesDeSalvar() {
+        if (dataCriacao == null) {
+            dataCriacao = LocalDateTime.now();
+        }
     }
 
     @Override

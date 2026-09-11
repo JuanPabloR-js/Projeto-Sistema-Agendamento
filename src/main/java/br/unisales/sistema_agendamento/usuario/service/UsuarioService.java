@@ -1,5 +1,7 @@
 package br.unisales.sistema_agendamento.usuario.service;
 
+import br.unisales.sistema_agendamento.exception.BusinessException;
+import br.unisales.sistema_agendamento.exception.ConflictException;
 import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
 import br.unisales.sistema_agendamento.usuario.dto.AtualizarUsuarioRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
@@ -40,6 +42,22 @@ public class UsuarioService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public Usuario criar(Usuario usuario) {
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new ConflictException(
+                    "Já existe um usuário cadastrado com esse email."
+            );
+        }
+
+        String senhaCriptografada =
+                passwordEncoder.encode(usuario.getSenha());
+
+        usuario.setSenha(senhaCriptografada);
+        usuario.setAtivo(true);
+
+        return usuarioRepository.save(usuario);
+    }
+
     /**
      * Altera a senha do usuário atualmente autenticado.
      *
@@ -70,7 +88,7 @@ public class UsuarioService {
 
         if (!senhaCorreta) {
             // Futuramente vamos substituir por uma exception padronizada do projeto.
-            throw new IllegalArgumentException("Senha atual incorreta");
+            throw new BusinessException("Senha atual incorreta");
         }
 
         // A nova senha também precisa ser criptografada antes de ser persistida.
