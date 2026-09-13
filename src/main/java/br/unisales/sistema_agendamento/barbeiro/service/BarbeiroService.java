@@ -52,7 +52,6 @@ public class BarbeiroService {
         }
 
         // Verifica se já existe um barbeiro associado ao mesmo Usuario.
-        //
         // findByUsuarioId(...) retorna Optional<Barbeiro>.
         // isPresent() retorna true caso exista um barbeiro encontrado.
         if (barbeiroRepository
@@ -65,7 +64,6 @@ public class BarbeiroService {
         }
 
         // Cria um novo objeto Barbeiro.
-        //
         // usuario -> Usuario encontrado anteriormente
         // especialidade -> enviada no DTO
         // true -> barbeiro comeca ativo
@@ -76,7 +74,6 @@ public class BarbeiroService {
         );
 
         // Salva o objeto no banco de dados.
-        //
         // O metodo save() é fornecido pelo JpaRepository.
         Barbeiro barbeiroSalvo =
                 barbeiroRepository.save(barbeiro);
@@ -101,11 +98,8 @@ public class BarbeiroService {
     public List<BarbeiroResponseDTO> listarTodos() {
 
         // findAll() busca todos os Barbeiros no banco.
-        //
         // stream() permite trabalhar com cada elemento da lista.
-        //
         // map(...) transforma cada Barbeiro em BarbeiroResponseDTO.
-        //
         // toList() cria a lista final de DTOs.
         return barbeiroRepository.findAll()
                 .stream()
