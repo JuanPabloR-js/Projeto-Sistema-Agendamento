@@ -8,5 +8,7 @@ CREATE TABLE tb_usuario (
     ativo BOOLEAN NOT NULL DEFAULT TRUE,
     data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT uk_usuario_email UNIQUE (email)
+    CONSTRAINT uk_usuario_email UNIQUE (email),
+    CONSTRAINT ck_usuario_role
+                        CHECK (role IN ('CLIENTE', 'BARBEIRO', 'ADMIN'))
 );
