@@ -31,7 +31,7 @@ public class Usuario {
     private LocalDateTime dataCriacao;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Role role;
 
     public Usuario(String nome, String email, String telefone, String senha, Role role) {
