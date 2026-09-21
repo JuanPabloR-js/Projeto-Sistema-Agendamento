@@ -1,5 +1,10 @@
 package br.unisales.sistema_agendamento.exception;
 
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +32,12 @@ public class GlobalExceptionHandler {
     private static final Logger logger =
             LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler({
+            ResourceNotFoundException.class,
+            EntityNotFoundException.class
+    })
     public ResponseEntity<ProblemDetail> tratarRecursoNaoEncontrado(
-            ResourceNotFoundException exception,
+            RuntimeException exception,
             HttpServletRequest request
     ) {
         ProblemDetail problema = criarProblema(
@@ -39,9 +47,7 @@ public class GlobalExceptionHandler {
                 request
         );
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
-                .body(problema);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problema);
     }
 
     @ExceptionHandler(BusinessException.class)
@@ -173,5 +179,55 @@ public class GlobalExceptionHandler {
         problema.setProperty("path", request.getRequestURI());
 
         return problema;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ProblemDetail> tratarFalhaDeAutenticacao(
+            AuthenticationException exception,
+            HttpServletRequest request
+    ) {
+        ProblemDetail problema = criarProblema(
+                HttpStatus.UNAUTHORIZED,
+                "Falha de autenticação",
+                "Não foi possível autenticar com as credenciais informadas.",
+                request
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(problema);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ProblemDetail> tratarIntegridadeDosDados(
+            DataIntegrityViolationException exception,
+            HttpServletRequest request
+    ) {
+        logger.warn("Violação de integridade dos dados", exception);
+
+        ProblemDetail problema = criarProblema(
+                HttpStatus.CONFLICT,
+                "Conflito de dados",
+                "A operação viola uma restrição dos dados cadastrados.",
+                request
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problema);
+    }
+
+    @ExceptionHandler({
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class
+    })
+    public ResponseEntity<ProblemDetail> tratarParametroInvalido(
+            Exception exception,
+            HttpServletRequest request
+    ) {
+        ProblemDetail problema = criarProblema(
+                HttpStatus.BAD_REQUEST,
+                "Parâmetro inválido",
+                "Verifique os parâmetros obrigatórios, as datas e os valores informados.",
+                request
+        );
+
+        return ResponseEntity.badRequest().body(problema);
     }
 }

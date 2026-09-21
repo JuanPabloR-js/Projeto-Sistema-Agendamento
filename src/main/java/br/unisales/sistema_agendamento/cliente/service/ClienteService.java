@@ -2,7 +2,7 @@
 
 package br.unisales.sistema_agendamento.cliente.service;
 
-
+import org.springframework.transaction.annotation.Transactional;
 import br.unisales.sistema_agendamento.cliente.domain.Cliente;
 import br.unisales.sistema_agendamento.cliente.dto.ClienteRequestDTO;
 import br.unisales.sistema_agendamento.cliente.dto.ClienteResponseDTO;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
+@Transactional(readOnly = true)
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
@@ -31,6 +32,7 @@ public class ClienteService {
         this.usuarioService = usuarioService;
     }
 
+    @Transactional
     public ClienteResponseDTO criar(ClienteRequestDTO dto) {
         if (clienteRepository.existsByUsuarioId(dto.getUsuarioId())) {
             throw new ConflictException(
@@ -62,11 +64,21 @@ public class ClienteService {
         return converterParaResponseDTO(cliente);
     }
 
+    @Transactional
     public ClienteResponseDTO atualizar(
             Long clienteId,
             ClienteRequestDTO dto
     ) {
         Cliente cliente = buscarEntidadePorId(clienteId);
+        if (!Objects.equals(
+                cliente.getUsuario().getId(),
+                dto.getUsuarioId()
+        )) {
+            throw new BusinessException(
+                    "Não é permitido alterar o usuário vinculado ao cliente."
+            );
+        }
+
         Usuario usuario = usuarioService.buscarEntidadePorId(dto.getUsuarioId());
 
         validarRoleCliente(usuario);

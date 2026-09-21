@@ -1,5 +1,11 @@
 package br.unisales.sistema_agendamento.auth.service;
 
+import br.unisales.sistema_agendamento.auth.dto.CadastroClienteRequestDTO;
+import br.unisales.sistema_agendamento.cliente.dto.ClienteRequestDTO;
+import br.unisales.sistema_agendamento.cliente.dto.ClienteResponseDTO;
+import br.unisales.sistema_agendamento.cliente.service.ClienteService;
+import br.unisales.sistema_agendamento.usuario.model.Role;
+import org.springframework.transaction.annotation.Transactional;
 import br.unisales.sistema_agendamento.auth.dto.LoginRequestDTO;
 import br.unisales.sistema_agendamento.auth.dto.LoginResponseDTO;
 import br.unisales.sistema_agendamento.security.JwtService;
@@ -20,17 +26,20 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
+    private final ClienteService clienteService;
     private final UsuarioService usuarioService;
     private final JwtService jwtService;
 
     public AuthService(
             AuthenticationManager authenticationManager,
             CustomUserDetailsService userDetailsService,
+            ClienteService clienteService,
             UsuarioService usuarioService,
             JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
+        this.clienteService = clienteService;
         this.usuarioService = usuarioService;
         this.jwtService = jwtService;
     }
@@ -74,5 +83,28 @@ public class AuthService {
                 usuario.getEmail(),
                 usuario.getRole().name()
         );
+    }
+
+    @Transactional
+    public ClienteResponseDTO cadastrar(CadastroClienteRequestDTO dto) {
+        /*
+         * A role é definida pelo backend.
+         * O cadastro público não pode escolher ADMIN ou BARBEIRO.
+         */
+        Usuario usuario = usuarioService.criar(
+                dto.nome(),
+                dto.email(),
+                dto.telefone(),
+                dto.senha(),
+                Role.CLIENTE
+        );
+
+        // Vincula o novo perfil à conta que acabou de ser criada.
+        ClienteRequestDTO clienteDTO = new ClienteRequestDTO(
+                usuario.getId(),
+                dto.telefone()
+        );
+
+        return clienteService.criar(clienteDTO);
     }
 }

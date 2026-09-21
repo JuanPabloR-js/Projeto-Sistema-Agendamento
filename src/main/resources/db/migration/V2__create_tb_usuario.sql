@@ -1,14 +1,14 @@
-CREATE TABLE tb_usuario (
-    id BIGSERIAL PRIMARY KEY,
-    nome VARCHAR(150) NOT NULL,
-    email VARCHAR(150) NOT NULL,
-    telefone VARCHAR(20),
-    senha VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL,
-    ativo BOOLEAN NOT NULL DEFAULT TRUE,
-    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE tb_usuario(
+    id           BIGSERIAL PRIMARY KEY,
+    nome         VARCHAR(150) NOT NULL,
+    email        VARCHAR(150) NOT NULL,
+    telefone     VARCHAR(20),
+    senha        VARCHAR(255) NOT NULL,
+    role         VARCHAR(20)  NOT NULL,
+    ativo        BOOLEAN      NOT NULL DEFAULT TRUE,
+    data_criacao TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT uk_usuario_email UNIQUE (email),
     CONSTRAINT ck_usuario_role
-                        CHECK (role IN ('CLIENTE', 'BARBEIRO', 'ADMIN'))
+        CHECK (role IN ('CLIENTE', 'BARBEIRO', 'ADMIN'))
 );

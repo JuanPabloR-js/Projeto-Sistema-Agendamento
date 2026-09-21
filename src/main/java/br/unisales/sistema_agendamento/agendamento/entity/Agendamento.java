@@ -1,8 +1,13 @@
 package br.unisales.sistema_agendamento.agendamento.entity;
 
 import br.unisales.sistema_agendamento.agendamento.enumeration.StatusAgendamento;
+import br.unisales.sistema_agendamento.barbeiro.model.Barbeiro;
+import br.unisales.sistema_agendamento.cliente.domain.Cliente;
+import br.unisales.sistema_agendamento.exception.BusinessException;
+import br.unisales.sistema_agendamento.servico.entity.Servico;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 /**
@@ -19,21 +24,22 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 
 public class Agendamento {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;*/
+    private Cliente cliente;
 
-    /*@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "barbeiro_id", nullable = false)
-    private Barbeiro barbeiro;*/
+    private Barbeiro barbeiro;
 
-    /*@ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "servico_id", nullable = false)
-    private Servico servico;*/
+    private Servico servico;
 
     @Column(name = "data_hora_inicio", nullable = false)
     private LocalDateTime dataHoraInicio;
@@ -52,7 +58,7 @@ public class Agendamento {
     private LocalDateTime dataCriacao;
 
     @PrePersist
-    public void antesDeSalvar(){
+    public void antesDeSalvar() {
         if (dataCriacao == null) {
             dataCriacao = LocalDateTime.now();
         }
@@ -63,14 +69,34 @@ public class Agendamento {
     }
 
     public void cancelar() {
+        if (status != StatusAgendamento.AGENDADO
+                && status != StatusAgendamento.CONFIRMADO) {
+
+            throw new BusinessException(
+                    "Somente agendamentos agendados ou confirmados podem ser cancelados."
+            );
+        }
+
         this.status = StatusAgendamento.CANCELADO;
     }
 
     public void confirmar() {
+        if (status != StatusAgendamento.AGENDADO) {
+            throw new BusinessException(
+                    "Somente um agendamento AGENDADO pode ser confirmado."
+            );
+        }
+
         this.status = StatusAgendamento.CONFIRMADO;
     }
 
     public void concluir() {
+        if (status != StatusAgendamento.CONFIRMADO) {
+            throw new BusinessException(
+                    "Confirme o agendamento antes de concluir."
+            );
+        }
+
         this.status = StatusAgendamento.CONCLUIDO;
     }
 }

@@ -15,8 +15,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 /**
- * @apiNote Serviço que lida com a lógica de negócio da entidade "Servico".
  * @author Mateus Alves Costa
+ * @apiNote Serviço que lida com a lógica de negócio da entidade "Servico".
  * @since 07.09.2026
  */
 
@@ -27,13 +27,13 @@ public class ServicoService {
     private final ServicoRepository repository;
 
     /**
-     * @apiNote Cria um novo serviço com base nos dados fornecidos.
      * @param request --> Dados para criação do serviço.
      * @return --> Retorna um objeto ServicoResponse contendo os dados do serviço
-     *         criado.
+     * criado.
      * @throws DataIntegrityViolationException --> Lançada caso o nome fornecido já
      *                                         esteja
      *                                         cadastrado.
+     * @apiNote Cria um novo serviço com base nos dados fornecidos.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
@@ -49,29 +49,36 @@ public class ServicoService {
     }
 
     /**
-     * @apiNote Busca um serviço pelo seu ID.
      * @param id --> ID do serviço a ser buscado.
      * @return --> Retorna um objeto ServicoResponse contendo os dados do serviço
-     *         encontrado.
+     * encontrado.
      * @throws EntityNotFoundException --> Lançada caso o serviço com o ID fornecido
      *                                 não seja
      *                                 encontrado.
+     * @apiNote Busca um serviço pelo seu ID.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
     public ServicoResponse buscarPorId(Long id) {
-        Servico servico = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Serviço não encontrado com o ID: " + id));
-        return toDto(servico);
+        return toDto(buscarEntidadePorId(id));
+    }
+
+    public Servico buscarEntidadePorId(Long id) {
+        return repository.findById(id)
+                .orElseThrow(() ->
+                        new EntityNotFoundException(
+                                "Serviço não encontrado com o ID: " + id
+                        )
+                );
     }
 
     /**
-     * @apiNote Busca serviços com base em critérios de filtro, como nome e status
-     *          do serviço.
      * @param nome     --> Nome do serviço a ser filtrado.
      * @param ativo    --> Status do serviço a ser filtrado.
      * @param pageable --> Configuração de paginação.
      * @return --> Retorna uma página com os dados dos serviços encontrados.
+     * @apiNote Busca serviços com base em critérios de filtro, como nome e status
+     * do serviço.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
@@ -88,9 +95,9 @@ public class ServicoService {
     }
 
     /**
-     * @apiNote Lista todos os serviços.
      * @param pageable --> Configuração de paginação.
      * @return --> Retorna uma página de objetos ServicoResponse.
+     * @apiNote Lista todos os serviços.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
@@ -99,17 +106,17 @@ public class ServicoService {
     }
 
     /**
-     * @apiNote Atualiza um serviço existente com base nos dados fornecidos.
      * @param id      --> ID do serviço a ser atualizado.
      * @param request --> Dados para atualização do serviço.
      * @return --> Retorna um objeto ServicoResponse contendo os dados do serviço
-     *         atualizado.
+     * atualizado.
      * @throws DataIntegrityViolationException --> Lançada caso o nome fornecido já
      *                                         esteja
      *                                         cadastrado em outro serviço.
      * @throws EntityNotFoundException         --> Lançada caso o serviço com o ID
      *                                         fornecido não seja
      *                                         encontrado.
+     * @apiNote Atualiza um serviço existente com base nos dados fornecidos.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
@@ -120,21 +127,20 @@ public class ServicoService {
         }
 
         Servico servico = repository.findById(id).orElseThrow(
-            () -> new EntityNotFoundException("Serviço não encontrado com o ID: " + id)
+                () -> new EntityNotFoundException("Serviço não encontrado com o ID: " + id)
         );
 
         if (request.nome() != null) servico.setNome(request.nome().trim());
         if (request.descricao() != null) servico.setDescricao(request.descricao());
         if (request.duracaoMinutos() != null) servico.setDuracaoMinutos(request.duracaoMinutos());
         if (request.preco() != null) servico.setPreco(request.preco());
-        if (request.ativo() != null)servico.setAtivo(request.ativo());
+        if (request.ativo() != null) servico.setAtivo(request.ativo());
 
         servico = repository.save(servico);
         return toDto(servico);
     }
 
     /**
-     * @apiNote Ativa ou desativa um serviço com base no valor fornecido.
      * @param id    --> ID do serviço a ser ativado/desativado.
      * @param valor --> Valor booleano indicando se o serviço deve ser ativado
      *              (true) ou
@@ -142,6 +148,7 @@ public class ServicoService {
      * @throws EntityNotFoundException --> Lançada caso o serviço com o ID fornecido
      *                                 não seja
      *                                 encontrado.
+     * @apiNote Ativa ou desativa um serviço com base no valor fornecido.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */
@@ -156,9 +163,9 @@ public class ServicoService {
     }
 
     /**
-     * @apiNote Converte uma entidade Servico em um objeto ServicoResponse.
      * @param servico --> Entidade Servico a ser convertida.
      * @return --> Retorna um objeto ServicoResponse contendo os dados do serviço.
+     * @apiNote Converte uma entidade Servico em um objeto ServicoResponse.
      * @author Mateus Alves Costa
      * @since 07.09.2026
      */

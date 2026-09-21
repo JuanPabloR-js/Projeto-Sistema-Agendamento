@@ -1,5 +1,8 @@
 package br.unisales.sistema_agendamento.auth.controller;
 
+import br.unisales.sistema_agendamento.auth.dto.CadastroClienteRequestDTO;
+import br.unisales.sistema_agendamento.cliente.dto.ClienteResponseDTO;
+import org.springframework.http.HttpStatus;
 import br.unisales.sistema_agendamento.auth.dto.LoginRequestDTO;
 import br.unisales.sistema_agendamento.auth.dto.LoginResponseDTO;
 import br.unisales.sistema_agendamento.auth.service.AuthService;
@@ -31,5 +34,15 @@ public class AuthController {
             @Valid @RequestBody LoginRequestDTO request
     ) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/cadastro")
+    @Operation(summary = "Cria a conta e o perfil do cliente")
+    public ResponseEntity<ClienteResponseDTO> cadastrar(
+            @Valid @RequestBody CadastroClienteRequestDTO request
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(authService.cadastrar(request));
     }
 }

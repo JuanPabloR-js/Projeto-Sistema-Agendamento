@@ -25,6 +25,10 @@ public record CadastroClienteRequestDTO(
                 description = "Email do cliente",
                 example = "joao@email.com"
         )
+        @Size(
+                max = 150,
+                message = "O e-mail deve possuir no máximo 150 caracteres."
+        )
         @NotBlank(message = "O email é obrigatório.")
         @Email(message = "Informe um email válido.")
         String email,

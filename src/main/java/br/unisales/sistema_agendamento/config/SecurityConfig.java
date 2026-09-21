@@ -74,14 +74,14 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // Somente os endpoints públicos de autenticação.
+                        // Cadastro público cria apenas contas CLIENTE.
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/auth/login",
-                                "/auth/register"
+                                "/auth/cadastro"
                         ).permitAll()
 
-                        // Visitantes podem consultar profissionais e serviços.
+                        // Inclui a consulta pública de horários disponíveis.
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/barbeiros",
@@ -90,7 +90,6 @@ public class SecurityConfig {
                                 "/servicos/**"
                         ).permitAll()
 
-                        // Operações de alteração ficam restritas ao administrador.
                         .requestMatchers(
                                 "/barbeiros",
                                 "/barbeiros/**",
@@ -98,8 +97,56 @@ public class SecurityConfig {
                                 "/servicos/**"
                         ).hasRole("ADMIN")
 
-                        // As permissões específicas de agendamento
-                        // serão acrescentadas quando implementarmos suas rotas.
+                        /*
+                         * As rotas atuais de Cliente aceitam IDs arbitrários.
+                         * Ficam administrativas; o usuário consulta e altera
+                         * seus dados básicos em /usuarios/me.
+                         */
+                        .requestMatchers(
+                                "/clientes",
+                                "/clientes/**"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/agendamentos"
+                        ).hasRole("CLIENTE")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/agendamentos"
+                        ).hasRole("ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/agendamentos/meus"
+                        ).hasAnyRole("CLIENTE", "BARBEIRO")
+
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/agendamentos/*"
+                        ).hasAnyRole("CLIENTE", "BARBEIRO", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/agendamentos/*/cancelar"
+                        ).hasAnyRole("CLIENTE", "ADMIN")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/agendamentos/*/confirmar"
+                        ).hasRole("BARBEIRO")
+
+                        .requestMatchers(
+                                HttpMethod.PATCH,
+                                "/agendamentos/*/concluir"
+                        ).hasAnyRole("BARBEIRO", "ADMIN")
+
+                        .requestMatchers(
+                                "/agendamentos",
+                                "/agendamentos/**"
+                        ).denyAll()
+
                         .anyRequest().authenticated()
                 )
 

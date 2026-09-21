@@ -1,5 +1,6 @@
 package br.unisales.sistema_agendamento.Auth;
 
+import br.unisales.sistema_agendamento.cliente.service.ClienteService;
 import br.unisales.sistema_agendamento.auth.dto.LoginRequestDTO;
 import br.unisales.sistema_agendamento.auth.dto.LoginResponseDTO;
 import br.unisales.sistema_agendamento.auth.service.AuthService;
@@ -43,6 +44,9 @@ class AuthServiceTest {
 
     @Mock
     private UsuarioService usuarioService;
+
+    @Mock
+    private ClienteService clienteService;
 
     @Mock
     private JwtService jwtService;
