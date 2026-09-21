@@ -4,49 +4,41 @@ import br.unisales.sistema_agendamento.usuario.dto.AtualizarUsuarioRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.UsuarioResponseDTO;
 import br.unisales.sistema_agendamento.usuario.service.UsuarioService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-@RestController // Expõe endpoints HTTP da API.
-@RequestMapping("/usuarios") // Prefixo das rotas deste controller.
+@RestController
+@RequestMapping("/usuarios")
+@Tag(name = "Usuários")
+@SecurityRequirement(name = "bearerAuth")
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
 
-    // O Spring injeta o service responsável pelas regras de usuário.
     public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
-    // Retorna os dados do usuário autenticado.
     @GetMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> buscarMeuPerfil() {
-
-        UsuarioResponseDTO response =
-                usuarioService.buscarMeuPerfil();
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(usuarioService.buscarMeuPerfil());
     }
 
-    // Recebe nome e telefone e atualiza o perfil autenticado.
     @PutMapping("/me")
     public ResponseEntity<UsuarioResponseDTO> atualizarMeuPerfil(
-            @RequestBody AtualizarUsuarioRequestDTO dto) {
+            @Valid @RequestBody AtualizarUsuarioRequestDTO dto) {
 
-        UsuarioResponseDTO response =
-                usuarioService.atualizarMeuPerfil(dto);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(usuarioService.atualizarMeuPerfil(dto));
     }
 
-    // Recebe senha atual e nova senha e delega a troca ao service.
     @PutMapping("/me/senha")
     public ResponseEntity<Void> trocarSenha(
-            @RequestBody TrocarSenhaRequestDTO dto) {
+            @Valid @RequestBody TrocarSenhaRequestDTO dto) {
 
         usuarioService.trocarSenha(dto);
 
-        // 204: operação realizada com sucesso, sem corpo de resposta.
         return ResponseEntity.noContent().build();
     }
 }

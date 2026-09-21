@@ -9,5 +9,5 @@ CREATE TABLE barbeiros (
 
     CONSTRAINT fk_barbeiros_usuario
         FOREIGN KEY (usuario_id)
-        REFERENCES usuarios(id)
+        REFERENCES tb_usuario(id)
 );
