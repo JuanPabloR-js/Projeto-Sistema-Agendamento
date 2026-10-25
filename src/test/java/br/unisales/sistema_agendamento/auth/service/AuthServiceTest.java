@@ -1,10 +1,8 @@
-package br.unisales.sistema_agendamento.Auth;
+package br.unisales.sistema_agendamento.auth.service;
 
 import br.unisales.sistema_agendamento.cliente.service.ClienteService;
 import br.unisales.sistema_agendamento.auth.dto.LoginRequestDTO;
 import br.unisales.sistema_agendamento.auth.dto.LoginResponseDTO;
-import br.unisales.sistema_agendamento.auth.service.AuthService;
-import br.unisales.sistema_agendamento.auth.service.CustomUserDetailsService;
 import br.unisales.sistema_agendamento.security.JwtService;
 import br.unisales.sistema_agendamento.usuario.model.Role;
 import br.unisales.sistema_agendamento.usuario.model.Usuario;

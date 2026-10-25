@@ -39,10 +39,13 @@ public class ServicoService {
      */
     @Transactional(readOnly = false)
     public ServicoResponse criar(ServicoRequest request) {
-        if (repository.existsByNome(request.nome())) {
+        // O nome é salvo sem espaços, então a verificação também deve ignorá-los.
+        String nome = request.nome().trim();
+
+        if (repository.existsByNome(nome)) {
             throw new DataIntegrityViolationException("Serviço com o mesmo nome já existe.");
         }
-        Servico servico = new Servico(request.nome().trim(), request.descricao(),
+        Servico servico = new Servico(nome, request.descricao(),
                 request.duracaoMinutos(), request.preco(), request.ativo());
         servico = repository.save(servico);
         return toDto(servico);
@@ -122,15 +125,21 @@ public class ServicoService {
      */
     @Transactional(readOnly = false)
     public ServicoResponse atualizar(Long id, ServicoRequest request) {
-        if (repository.existsByNomeAndIdNot(request.nome().trim(), id)) {
-            throw new DataIntegrityViolationException("Serviço com o mesmo nome já existe.");
-        }
-
+        // Primeiro confirma que o serviço existe, para responder 404 antes de 409.
         Servico servico = repository.findById(id).orElseThrow(
                 () -> new EntityNotFoundException("Serviço não encontrado com o ID: " + id)
         );
 
-        if (request.nome() != null) servico.setNome(request.nome().trim());
+        // Campos nulos mantêm o valor atual, inclusive o nome.
+        if (request.nome() != null) {
+            String nome = request.nome().trim();
+
+            if (repository.existsByNomeAndIdNot(nome, id)) {
+                throw new DataIntegrityViolationException("Serviço com o mesmo nome já existe.");
+            }
+
+            servico.setNome(nome);
+        }
         if (request.descricao() != null) servico.setDescricao(request.descricao());
         if (request.duracaoMinutos() != null) servico.setDuracaoMinutos(request.duracaoMinutos());
         if (request.preco() != null) servico.setPreco(request.preco());

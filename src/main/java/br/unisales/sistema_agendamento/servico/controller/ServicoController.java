@@ -21,6 +21,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import br.unisales.sistema_agendamento.servico.dto.ServicoRequest;
 import br.unisales.sistema_agendamento.servico.dto.ServicoResponse;
 import br.unisales.sistema_agendamento.servico.service.ServicoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -37,7 +38,7 @@ public class ServicoController {
      * @since 07.09.2026
      */
     @PostMapping
-    public ResponseEntity<ServicoResponse> criar(@RequestBody ServicoRequest request) {
+    public ResponseEntity<ServicoResponse> criar(@Valid @RequestBody ServicoRequest request) {
         ServicoResponse response = service.criar(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(response.id()).toUri();
@@ -97,7 +98,7 @@ public class ServicoController {
      * @since 07.09.2026
      */
     @PutMapping("/{id}")
-    public ResponseEntity<ServicoResponse> atualizar(@PathVariable Long id, @RequestBody ServicoRequest request) {
+    public ResponseEntity<ServicoResponse> atualizar(@PathVariable Long id, @Valid @RequestBody ServicoRequest request) {
         ServicoResponse response = service.atualizar(id, request);
         return ResponseEntity.ok(response);
     }
