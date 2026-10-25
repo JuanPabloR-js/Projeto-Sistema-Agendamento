@@ -153,6 +153,22 @@ class ServicoRequestValidationTest {
         ).isEmpty());
     }
 
+    // A coluna é DECIMAL(6,2): uma terceira casa seria arredondada pelo banco.
+    @Test
+    void deveRejeitarPrecoComTresCasasDecimais() {
+        assertErroNoCampo(
+                com("Corte", "Descrição", 30, new BigDecimal("45.555"), true),
+                "preco"
+        );
+    }
+
+    @Test
+    void deveAceitarPrecoComDuasCasasDecimais() {
+        assertTrue(validador.validate(
+                com("Corte", "Descrição", 30, new BigDecimal("45.55"), true)
+        ).isEmpty());
+    }
+
     // ---------------------------------------------------------------- ativo
 
     @Test

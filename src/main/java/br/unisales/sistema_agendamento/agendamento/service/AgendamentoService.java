@@ -96,6 +96,13 @@ public class AgendamentoService {
                         new ResourceNotFoundException("Barbeiro não encontrado.")
                 );
 
+        /*
+         * Bloqueia também a agenda do cliente, sempre depois da do barbeiro.
+         * Assim dois pedidos do mesmo cliente com barbeiros diferentes
+         * não passam juntos pela verificação de conflito do cliente.
+         */
+        repository.bloquearAgendaDoCliente(cliente.getId());
+
         Barbeiro barbeiro = buscarBarbeiroAtivo(dto.barbeiroId());
         Servico servico = buscarServicoAtivo(dto.servicoId());
 
@@ -135,6 +142,19 @@ public class AgendamentoService {
         if (conflito) {
             throw new ConflictException(
                     "O barbeiro já possui atendimento neste período."
+            );
+        }
+
+        boolean clienteOcupado = repository.existeConflitoDoCliente(
+                cliente.getId(),
+                inicio,
+                fim,
+                StatusAgendamento.CANCELADO
+        );
+
+        if (clienteOcupado) {
+            throw new ConflictException(
+                    "Você já possui um atendimento neste período."
             );
         }
 

@@ -285,6 +285,61 @@ class AgendamentoServiceTest {
         verify(repository, never()).save(any(Agendamento.class));
     }
 
+    @Test
+    void naoDeveCriarQuandoClienteJaPossuiAtendimentoNoPeriodo() {
+        prepararCriacaoComServico();
+
+        LocalDateTime inicio = DIA.atTime(14, 0);
+
+        // O cliente já está com outro barbeiro nesse período.
+        when(repository.existeConflitoDoCliente(
+                10L,
+                inicio,
+                inicio.plusMinutes(40),
+                StatusAgendamento.CANCELADO
+        )).thenReturn(true);
+
+        ConflictException erro = assertThrows(
+                ConflictException.class,
+                () -> service.criar(request(inicio))
+        );
+
+        assertEquals(
+                "Você já possui um atendimento neste período.",
+                erro.getMessage()
+        );
+
+        verify(repository, never()).save(any(Agendamento.class));
+    }
+
+    @Test
+    void deveTravarAgendaDoClienteDepoisDaDoBarbeiro() {
+        prepararCriacaoComServico();
+        permitirSalvar();
+
+        LocalDateTime inicio = DIA.atTime(14, 0);
+
+        service.criar(request(inicio));
+
+        /*
+         * A trava do cliente vem sempre depois da do barbeiro.
+         * Com a mesma ordem em todos os pedidos, não há deadlock.
+         */
+        InOrder ordem = inOrder(repository);
+
+        ordem.verify(repository).bloquearAgendaDoBarbeiro(20L);
+        ordem.verify(repository).bloquearAgendaDoCliente(10L);
+
+        ordem.verify(repository).existeConflitoDoCliente(
+                10L,
+                inicio,
+                inicio.plusMinutes(40),
+                StatusAgendamento.CANCELADO
+        );
+
+        ordem.verify(repository).save(any(Agendamento.class));
+    }
+
 
 
     @Test
