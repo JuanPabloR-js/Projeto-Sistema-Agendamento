@@ -1,8 +1,11 @@
 package br.unisales.sistema_agendamento.usuario.service;
 
+import br.unisales.sistema_agendamento.cliente.domain.Cliente;
 import br.unisales.sistema_agendamento.cliente.repository.ClienteRepository;
 import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
+import br.unisales.sistema_agendamento.usuario.dto.AtualizarUsuarioRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
+import br.unisales.sistema_agendamento.usuario.dto.UsuarioResponseDTO;
 import br.unisales.sistema_agendamento.usuario.model.Role;
 import br.unisales.sistema_agendamento.usuario.model.Usuario;
 import br.unisales.sistema_agendamento.usuario.repository.UsuarioRepository;
@@ -23,6 +26,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -164,6 +169,122 @@ class UsuarioServiceTest {
 
         // Confirma que a alteração foi enviada para persistência.
         verify(usuarioRepository).save(usuario);
+    }
+
+    @Test
+    void deveRemoverEspacosDoNomeAoAtualizarPerfil() {
+
+        Usuario usuario = new Usuario(
+                "Breno",
+                "breno@email.com",
+                "27999999999",
+                "senha",
+                Role.CLIENTE
+        );
+
+        // Simula um usuário autenticado pelo email.
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken(
+                        "breno@email.com",
+                        null
+                )
+        );
+
+        when(usuarioRepository.findByEmail("breno@email.com"))
+                .thenReturn(Optional.of(usuario));
+
+        UsuarioResponseDTO resposta = usuarioService.atualizarMeuPerfil(
+                new AtualizarUsuarioRequestDTO(
+                        "   Breno Silva   ",
+                        "27988887777"
+                )
+        );
+
+        // O nome deve ser gravado sem os espaços das pontas, como no cadastro.
+        assertEquals("Breno Silva", usuario.getNome());
+        assertEquals("Breno Silva", resposta.nome());
+    }
+
+    @Test
+    void deveAtualizarTambemOTelefoneDoPerfilDeCliente() {
+
+        Usuario usuario = new Usuario(
+                "Breno",
+                "breno@email.com",
+                "27999999999",
+                "senha",
+                Role.CLIENTE
+        );
+        usuario.setId(1L);
+
+        // O perfil de cliente guarda uma cópia do telefone do usuário.
+        Cliente cliente = Cliente.builder()
+                .id(10L)
+                .usuario(usuario)
+                .telefone("27999999999")
+                .build();
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken(
+                        "breno@email.com",
+                        null
+                )
+        );
+
+        when(usuarioRepository.findByEmail("breno@email.com"))
+                .thenReturn(Optional.of(usuario));
+
+        when(clienteRepository.findByUsuarioId(1L))
+                .thenReturn(Optional.of(cliente));
+
+        usuarioService.atualizarMeuPerfil(
+                new AtualizarUsuarioRequestDTO(
+                        "Breno",
+                        "27911112222"
+                )
+        );
+
+        // Os dois telefones precisam continuar iguais.
+        assertEquals("27911112222", usuario.getTelefone());
+        assertEquals("27911112222", cliente.getTelefone());
+
+        verify(clienteRepository).save(cliente);
+    }
+
+    @Test
+    void naoDeveAlterarClienteQuandoUsuarioNaoTiverPerfilDeCliente() {
+
+        Usuario usuario = new Usuario(
+                "Carlos",
+                "carlos@email.com",
+                "27999999999",
+                "senha",
+                Role.BARBEIRO
+        );
+        usuario.setId(2L);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new TestingAuthenticationToken(
+                        "carlos@email.com",
+                        null
+                )
+        );
+
+        when(usuarioRepository.findByEmail("carlos@email.com"))
+                .thenReturn(Optional.of(usuario));
+
+        // Um barbeiro não possui perfil de cliente.
+        when(clienteRepository.findByUsuarioId(2L))
+                .thenReturn(Optional.empty());
+
+        usuarioService.atualizarMeuPerfil(
+                new AtualizarUsuarioRequestDTO(
+                        "Carlos",
+                        "27911112222"
+                )
+        );
+
+        verify(clienteRepository, never()).save(any());
     }
 
     // Evita que a autenticação simulada de um teste afete os próximos.
