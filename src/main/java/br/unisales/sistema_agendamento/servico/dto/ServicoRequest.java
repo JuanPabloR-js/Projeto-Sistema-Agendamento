@@ -3,6 +3,7 @@ package br.unisales.sistema_agendamento.servico.dto;
 import java.math.BigDecimal;
 
 import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -29,6 +30,7 @@ public record ServicoRequest(
     @NotNull(message = "O preço do serviço não pode ser nulo.")
     @PositiveOrZero(message = "O preço do serviço não pode ser negativo.")
     @DecimalMax(value = "1000.00", message = "O preço do serviço não pode ser maior que 1000.00.")
+    @Digits(integer = 4, fraction = 2, message = "O preço do serviço deve possuir no máximo duas casas decimais.")
     BigDecimal preco,
 
     @NotNull(message = "O status do serviço não pode ser nulo.")

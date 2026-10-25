@@ -1,5 +1,6 @@
 package br.unisales.sistema_agendamento.usuario.service;
 
+import br.unisales.sistema_agendamento.cliente.repository.ClienteRepository;
 import br.unisales.sistema_agendamento.exception.BusinessException;
 import br.unisales.sistema_agendamento.exception.ConflictException;
 import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
@@ -34,16 +35,22 @@ public class UsuarioService {
     // Responsável por comparar e criptografar senhas.
     private final PasswordEncoder passwordEncoder;
 
+    // Usado para manter o telefone do perfil de cliente igual ao do usuário.
+    private final ClienteRepository clienteRepository;
+
     /**
      * As dependências são recebidas pelo construtor.
-     * O Spring injeta automaticamente UsuarioRepository e PasswordEncoder.
+     * O Spring injeta automaticamente UsuarioRepository, PasswordEncoder
+     * e ClienteRepository.
      */
     public UsuarioService(
             UsuarioRepository usuarioRepository,
-            PasswordEncoder passwordEncoder
+            PasswordEncoder passwordEncoder,
+            ClienteRepository clienteRepository
     ) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.clienteRepository = clienteRepository;
     }
 
     public Usuario criar(Usuario usuario) {
@@ -222,6 +229,7 @@ public class UsuarioService {
      *
      * Email, senha e role possuem fluxos/regras separados.
      */
+    @Transactional
     public UsuarioResponseDTO atualizarMeuPerfil(
             AtualizarUsuarioRequestDTO dto) {
 
@@ -232,11 +240,19 @@ public class UsuarioService {
 
         Usuario usuario = buscarEntidadePorEmail(email);
 
-        usuario.setNome(dto.nome());
+        // Remove espaços nas pontas, como já acontece no cadastro.
+        usuario.setNome(dto.nome().strip());
         usuario.setTelefone(dto.telefone());
 
         // Persiste as alterações no banco.
         usuarioRepository.save(usuario);
+
+        // O perfil de cliente guarda uma cópia do telefone: mantém as duas iguais.
+        clienteRepository.findByUsuarioId(usuario.getId())
+                .ifPresent(cliente -> {
+                    cliente.setTelefone(dto.telefone());
+                    clienteRepository.save(cliente);
+                });
 
         // Devolve para a API somente os dados seguros do usuário atualizado.
         return toResponseDTO(usuario);

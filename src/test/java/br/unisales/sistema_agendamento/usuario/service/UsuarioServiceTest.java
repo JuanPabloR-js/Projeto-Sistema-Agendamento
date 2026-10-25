@@ -1,5 +1,6 @@
 package br.unisales.sistema_agendamento.usuario.service;
 
+import br.unisales.sistema_agendamento.cliente.repository.ClienteRepository;
 import br.unisales.sistema_agendamento.exception.ResourceNotFoundException;
 import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
 import br.unisales.sistema_agendamento.usuario.model.Role;
@@ -43,6 +44,10 @@ class UsuarioServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    // Simula o perfil de cliente, que guarda uma cópia do telefone.
+    @Mock
+    private ClienteRepository clienteRepository;
+
     private UsuarioService usuarioService;
 
     // Cria um novo service antes de cada teste usando os mocks.
@@ -50,7 +55,8 @@ class UsuarioServiceTest {
     void setUp() {
         usuarioService = new UsuarioService(
                 usuarioRepository,
-                passwordEncoder
+                passwordEncoder,
+                clienteRepository
         );
     }
 

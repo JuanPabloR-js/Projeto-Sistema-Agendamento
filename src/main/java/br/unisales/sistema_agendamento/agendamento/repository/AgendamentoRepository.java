@@ -37,6 +37,18 @@ public interface AgendamentoRepository
     )
     Optional<Long> bloquearAgendaDoBarbeiro(@Param("id") Long id);
 
+    // Mesma ideia, para a agenda do cliente.
+    @Query(
+            value = """
+                    SELECT id
+                    FROM tb_cliente
+                    WHERE id = :id
+                    FOR UPDATE
+                    """,
+            nativeQuery = true
+    )
+    Optional<Long> bloquearAgendaDoCliente(@Param("id") Long id);
+
     // Evita alterações simultâneas no mesmo agendamento.
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT a FROM Agendamento a WHERE a.id = :id")
@@ -56,6 +68,22 @@ public interface AgendamentoRepository
             """)
     boolean existeConflito(
             @Param("barbeiroId") Long barbeiroId,
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fim") LocalDateTime fim,
+            @Param("cancelado") StatusAgendamento cancelado
+    );
+
+    // Um cliente não pode estar em dois atendimentos ao mesmo tempo.
+    @Query("""
+            SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END
+            FROM Agendamento a
+            WHERE a.cliente.id = :clienteId
+              AND a.status <> :cancelado
+              AND a.dataHoraInicio < :fim
+              AND a.dataHoraFim > :inicio
+            """)
+    boolean existeConflitoDoCliente(
+            @Param("clienteId") Long clienteId,
             @Param("inicio") LocalDateTime inicio,
             @Param("fim") LocalDateTime fim,
             @Param("cancelado") StatusAgendamento cancelado
