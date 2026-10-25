@@ -51,7 +51,7 @@ import static org.mockito.Mockito.*;
  * @since 20.09.2026
  */
 @ExtendWith(MockitoExtension.class)
-class AgendamentoServiceAdicionalTest {
+class AgendamentoServiceTest {
 
     @Mock
     private AgendamentoRepository repository;
