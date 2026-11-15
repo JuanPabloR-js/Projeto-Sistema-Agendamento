@@ -9,6 +9,8 @@ import br.unisales.sistema_agendamento.cliente.service.ClienteService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import br.unisales.sistema_agendamento.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/clientes")
+@SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
 public class ClienteController {
 
     private final ClienteService clienteService;

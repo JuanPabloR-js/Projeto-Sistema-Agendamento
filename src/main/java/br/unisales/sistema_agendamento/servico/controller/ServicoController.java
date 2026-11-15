@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import br.unisales.sistema_agendamento.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import br.unisales.sistema_agendamento.servico.dto.ServicoRequest;
@@ -38,6 +40,7 @@ public class ServicoController {
      * @since 07.09.2026
      */
     @PostMapping
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<ServicoResponse> criar(@Valid @RequestBody ServicoRequest request) {
         ServicoResponse response = service.criar(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
@@ -98,6 +101,7 @@ public class ServicoController {
      * @since 07.09.2026
      */
     @PutMapping("/{id}")
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<ServicoResponse> atualizar(@PathVariable Long id, @Valid @RequestBody ServicoRequest request) {
         ServicoResponse response = service.atualizar(id, request);
         return ResponseEntity.ok(response);
@@ -113,6 +117,7 @@ public class ServicoController {
      * @since 07.09.2026
      */
     @PatchMapping("/{id}/{valor}")
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<Void> ativarDesativar(@PathVariable Long id, @PathVariable Boolean valor) {
         service.ativarDesativar(id, valor);
         return ResponseEntity.noContent().build();

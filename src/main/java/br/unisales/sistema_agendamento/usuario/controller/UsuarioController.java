@@ -5,6 +5,7 @@ import br.unisales.sistema_agendamento.usuario.dto.TrocarSenhaRequestDTO;
 import br.unisales.sistema_agendamento.usuario.dto.UsuarioResponseDTO;
 import br.unisales.sistema_agendamento.usuario.service.UsuarioService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import br.unisales.sistema_agendamento.config.OpenApiConfig;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/usuarios")
 @Tag(name = "Usuários")
-@SecurityRequirement(name = "bearerAuth")
+@SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
 public class UsuarioController {
 
     private final UsuarioService usuarioService;

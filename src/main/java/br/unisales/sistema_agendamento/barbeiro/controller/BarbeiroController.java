@@ -4,6 +4,8 @@ import br.unisales.sistema_agendamento.barbeiro.dto.BarbeiroRequestDTO;
 import br.unisales.sistema_agendamento.barbeiro.dto.BarbeiroResponseDTO;
 import br.unisales.sistema_agendamento.barbeiro.service.BarbeiroService;
 import jakarta.validation.Valid;
+import br.unisales.sistema_agendamento.config.OpenApiConfig;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -115,6 +117,7 @@ public class BarbeiroController {
      * Cria um novo perfil de barbeiro.
      */
     @PostMapping
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<BarbeiroResponseDTO> criar(
 
             /*
@@ -165,6 +168,7 @@ public class BarbeiroController {
      * PUT /barbeiros/3
      */
     @PutMapping("/{id}")
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<BarbeiroResponseDTO> atualizar(
 
             /*
@@ -201,6 +205,7 @@ public class BarbeiroController {
      * PATCH /barbeiros/2/ativar
      */
     @PatchMapping("/{id}/ativar")
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<BarbeiroResponseDTO> ativar(
             @PathVariable Long id) {
 
@@ -226,6 +231,7 @@ public class BarbeiroController {
      * PATCH /barbeiros/2/desativar
      */
     @PatchMapping("/{id}/desativar")
+    @SecurityRequirement(name = OpenApiConfig.JWT_SECURITY_SCHEME)
     public ResponseEntity<BarbeiroResponseDTO> desativar(
             @PathVariable Long id) {
 

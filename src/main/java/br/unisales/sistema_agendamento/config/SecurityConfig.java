@@ -74,12 +74,18 @@ public class SecurityConfig {
                                 "/v3/api-docs/**"
                         ).permitAll()
 
-                        // Cadastro público cria apenas contas CLIENTE.
-                        .requestMatchers(
-                                HttpMethod.POST,
-                                "/auth/login",
-                                "/auth/cadastro"
-                        ).permitAll()
+                                // Cadastro de barbeiro permitido somente para ADMIN.
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/auth/cadastro/barbeiro"
+                                ).hasRole("ADMIN")
+
+                               // Cadastro público cria apenas contas CLIENTE.
+                                .requestMatchers(
+                                        HttpMethod.POST,
+                                        "/auth/login",
+                                        "/auth/cadastro/clientes"
+                                ).permitAll()
 
                         // Inclui a consulta pública de horários disponíveis.
                         .requestMatchers(

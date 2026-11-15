@@ -1,10 +1,14 @@
 package br.unisales.sistema_agendamento.auth.service;
 
 import br.unisales.sistema_agendamento.auth.dto.CadastroClienteRequestDTO;
+import br.unisales.sistema_agendamento.barbeiro.service.BarbeiroService;
 import br.unisales.sistema_agendamento.cliente.dto.ClienteRequestDTO;
 import br.unisales.sistema_agendamento.cliente.dto.ClienteResponseDTO;
 import br.unisales.sistema_agendamento.cliente.service.ClienteService;
 import br.unisales.sistema_agendamento.usuario.model.Role;
+import br.unisales.sistema_agendamento.auth.dto.CadastroBarbeiroRequestDTO;
+import br.unisales.sistema_agendamento.barbeiro.dto.BarbeiroRequestDTO;
+import br.unisales.sistema_agendamento.barbeiro.dto.BarbeiroResponseDTO;
 import org.springframework.transaction.annotation.Transactional;
 import br.unisales.sistema_agendamento.auth.dto.LoginRequestDTO;
 import br.unisales.sistema_agendamento.auth.dto.LoginResponseDTO;
@@ -15,6 +19,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+
 
 /**
  * @apiNote Serviço responsável pela autenticação dos usuários.
@@ -27,19 +33,21 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final CustomUserDetailsService userDetailsService;
     private final ClienteService clienteService;
+    private final BarbeiroService barbeiroService;
     private final UsuarioService usuarioService;
     private final JwtService jwtService;
 
     public AuthService(
             AuthenticationManager authenticationManager,
             CustomUserDetailsService userDetailsService,
-            ClienteService clienteService,
+            ClienteService clienteService, BarbeiroService barbeiroService,
             UsuarioService usuarioService,
             JwtService jwtService
     ) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
         this.clienteService = clienteService;
+        this.barbeiroService = barbeiroService;
         this.usuarioService = usuarioService;
         this.jwtService = jwtService;
     }
@@ -107,4 +115,33 @@ public class AuthService {
 
         return clienteService.criar(clienteDTO);
     }
+
+
+    /**
+     * Cadastra um usuário com perfil BARBEIRO.
+     *
+     * Cria primeiro a conta de usuário e depois seu perfil profissional.
+     *
+     * @param dto dados necessários para o cadastro
+     * @return dados do barbeiro cadastrado
+     */
+    @Transactional
+    public BarbeiroResponseDTO cadastrarBarbeiro(CadastroBarbeiroRequestDTO dto) {
+
+        Usuario usuario = usuarioService.criar(
+                dto.nome(),
+                dto.email(),
+                dto.telefone(),
+                dto.senha(),
+                Role.BARBEIRO
+        );
+
+        BarbeiroRequestDTO barbeiroDTO = new BarbeiroRequestDTO(
+                usuario.getId(),
+                dto.especialidade()
+        );
+
+        return barbeiroService.criar(barbeiroDTO);
+    }
+
 }
